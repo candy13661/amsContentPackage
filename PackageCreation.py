@@ -4,8 +4,9 @@ from openpyxl import load_workbook
 from saveContent import *
 from savePackageData import *
 from getPackageTypeApi import *
+from getMediaApi import *
 
-wb = load_workbook(r'C:\Users\MTMUNIAN\Desktop\Python\Excel\AMS.xlsx')
+wb = load_workbook(r'D:\Users\CLLAVANIY\PycharmProjects\amsContentPackage\AMS.xlsx')
 
 sheet = wb.active
 
@@ -36,9 +37,20 @@ for row in sheet.iter_rows(min_row=4, max_col=1):
                 else:
                     episodic = 0
 
-                recordtype = sheet['G' + str(i)].value
-                yearofrelease = sheet['H' + str(i)].value
-                originallanguage = sheet['I' + str(i)].value
+                if not sheet['G' + str(i)].value is None:
+                    recordtype = sheet['G' + str(i)].value
+                else:
+                    recordtype = ''
+
+                if not sheet['H' + str(i)].value is None:
+                    yearofrelease = sheet['H' + str(i)].value
+                else:
+                    yearofrelease = ''
+
+                if not sheet['I' + str(i)].value is None:
+                    originallanguage = sheet['I' + str(i)].value
+                else:
+                    originallanguage = ''
 
                 # #################-- Set Synopsis---##################
                 contentsynopsis = []
@@ -247,8 +259,31 @@ for row in sheet.iter_rows(min_row=4, max_col=1):
                 else:
                     supplierid = ''
 
+                # ################### ----- Offer Creation ------ ####################
+
+                # ################### ----- STB ------ ####################
+                pkgoffers = []
+                if not sheet['BC' + str(i)].value is None:
+                    pkgOfferSTBRes = getMediaApi()
+                    for serviceAPISTBList in pkgOfferSTBRes['service']:
+                        if serviceAPISTBList['serviceLabel'] == sheet['BC' + str(i)].value:
+                            serviceSTB = serviceAPISTBList['serviceId']
+
+                    offerStartSTB = sheet['BD' + str(i)].value.strftime("%Y-%m-%d %H:%M:%S")
+
+                    offerEndSTB = sheet['BE' + str(i)].value.strftime("%Y-%m-%d %H:%M:%S")
+
+                    pkgOfferSTB = {"serviceId": "" + str(serviceSTB) + "", "offerStart": "" + offerStartSTB + "", "offerEnd": "" + offerEndSTB + ""}
+                    #pkgoffers = [pkgOfferSTB]
+                    print(pkgOfferSTB)
+
+
+                # ################### ----- IVP ------ ####################
+
+                # ################### ----- SOTT ------ ####################
+
                 # ########## savePackageapi API call function ###############
-                packageRes = savePackageapi(packagename, pkgid, pkgtypeid, autopublish, channelowner, pkgclassification, boxsettypeid, sortorder, acqstart, acqend, sponsored, supplierid, contentid)
+                packageRes = savePackageapi(packagename, pkgid, pkgtypeid, autopublish, channelowner, pkgclassification, boxsettypeid, sortorder, acqstart, acqend, sponsored, supplierid, contentid, pkgoffers)
                 print(packageRes['packId'])
 
             # #################--- (MP) Season ---##################

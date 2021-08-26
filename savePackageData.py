@@ -3,7 +3,7 @@ import json
 import datetime
 
 
-def savePackageapi(packagename, pkgid, pkgtypeid, autopublish, channelowner, pkgclassification, boxsettypeid, sortorder, acqstart, acqend, sponsored, supplierid, contentid):
+def savePackageapi(packagename, pkgid, pkgtypeid, autopublish, channelowner, pkgclassification, boxsettypeid, sortorder, acqstart, acqend, sponsored, supplierid, contentid, pkgoffers):
     # packagename = 'Test ABC'
 
     url = "http://52.74.32.248:8080/api/vod/savePackageData"
@@ -39,37 +39,7 @@ def savePackageapi(packagename, pkgid, pkgtypeid, autopublish, channelowner, pkg
                 "legacyndsId": "",
                 "autoUpdateMetadata": False
             },
-            "offers": [
-                {
-                    "serviceId": "34",
-                    "offerStart": "2021-03-01 00:00:00",
-                    "offerEnd": "2022-12-31 00:00:00",
-                    "providerContentTierId": [],
-                    "thirdPartyId": [
-                        "1"
-                    ],
-                    "comingSoonEndDate": "",
-                    "assetLifeCycleId": "",
-                    "sfvAccountId": [],
-                    "castingId": [],
-                    "blockAds": False,
-                    "preLogin": False,
-                    "download2Go": True,
-                    "d2GoRetentionPeriodId": "69",
-                    "d2GoPlaybackPeriodId": "",
-                    "d2GoMaxPlay_countId": "",
-                    "offerRow": [
-                        {
-                            "offerTypeId": "4",
-                            "regionId": "1",
-                            "currencyId": "",
-                            "priceId": "",
-                            "inAppPrice": "",
-                            "maxViewId": "0"
-                        }
-                    ]
-                }
-            ],
+            "offers": pkgoffers,
             "media": {
                 "imagesRibbon": [],
                 "mediafull": {
