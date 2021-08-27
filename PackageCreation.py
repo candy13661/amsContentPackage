@@ -5,8 +5,9 @@ from saveContent import *
 from savePackageData import *
 from getPackageTypeApi import *
 from getMediaApi import *
+from offerApi import *
 
-wb = load_workbook(r'D:\Users\CLLAVANIY\PycharmProjects\amsContentPackage\AMS.xlsx')
+wb = load_workbook(r'C:\Users\MTMUNIAN\Desktop\Python\Excel\AMS.xlsx')
 
 sheet = wb.active
 
@@ -264,7 +265,7 @@ for row in sheet.iter_rows(min_row=4, max_col=1):
                 # ################### ----- STB ------ ####################
                 pkgoffers = []
                 if not sheet['BC' + str(i)].value is None:
-                    pkgOfferSTBRes = getMediaApi()
+                    pkgOfferSTBRes = offerApi()
                     for serviceAPISTBList in pkgOfferSTBRes['service']:
                         if serviceAPISTBList['serviceLabel'] == sheet['BC' + str(i)].value:
                             serviceSTB = serviceAPISTBList['serviceId']
