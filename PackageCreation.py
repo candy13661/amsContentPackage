@@ -206,7 +206,7 @@ for row in sheet.iter_rows(min_row=4, max_col=1):
 
                 # ################### ----- Set Classification (single and multiple value)------ ####################
                 if not sheet['AV' + str(i)].value is None:
-                    classExcel = sheet['AV' + str(i)].value
+                    classExcel = sheet['AV' + str(i)].value.replace(" ", "")
                     classExcelDict = classExcel.split("|")
                     classExcelArray = []
                     for classification in classExcelDict:
@@ -270,22 +270,183 @@ for row in sheet.iter_rows(min_row=4, max_col=1):
                         if serviceAPISTBList['serviceLabel'] == sheet['BC' + str(i)].value:
                             serviceSTB = serviceAPISTBList['serviceId']
 
+                    # ----- STB Offer Start------ #
                     offerStartSTB = sheet['BD' + str(i)].value.strftime("%Y-%m-%d %H:%M:%S")
 
+                    # ----- STB Offer End------ #
                     offerEndSTB = sheet['BE' + str(i)].value.strftime("%Y-%m-%d %H:%M:%S")
 
-                    pkgOfferSTB = {"serviceId": "" + str(serviceSTB) + "", "offerStart": "" + offerStartSTB + "", "offerEnd": "" + offerEndSTB + ""}
-                    #pkgoffers = [pkgOfferSTB]
-                    print(pkgOfferSTB)
+                    # ----- STB PCT------ #
+                    if not sheet['BF' + str(i)].value is None:
+                        pctExcel = sheet['BF' + str(i)].value.replace(" ", "")
+                        pctExcelDict = pctExcel.split("|")
+                        pctSTBArray = []
+                        for pct in pctExcelDict:
+                            pctRes = offerApi()
+                            for classs in pctRes['providerContentTier']:
+                                if classs['providerContentTierLabel'] == pct and classs['serviceId'] == serviceSTB:
+                                    pctSTBArray.append("" + str(classs['providerContentTierId']) + "")
+                        pctSTB = pctSTBArray
+                    else:
+                        print('STB PCT is Empty')
+                        break
 
+                    # ----- STB Charge Code------ #
+                    if not sheet['BG' + str(i)].value is None:
+                        chgCodeSTB = sheet['BG' + str(i)].value
+                    else:
+                        chgCodeSTB = ''
+
+                    # ################### ----- Business Model ------ ####################
+                    bmSTB = ''
+                    currencySTB = ''
+                    priceSTB = ''
+
+                    if not sheet['BH' + str(i)].value is None:
+                        offerRes = offerApi()
+                        offerRes2 = offerRes['offerRow']
+                        for bizmodSTB in offerRes2['businessModel']:
+                            if bizmodSTB['businessModelLabel'] == sheet['BH' + str(i)].value:
+                                bmSTB = bizmodSTB['businessModelId']
+
+                        # ##### --- Set currency and Price for Business Model 9 - TVOD ----- #####
+                        if bmSTB == 4:
+                            priceRes = offerApi()
+                            priceRes2 = priceRes['offerRow']
+                            for priceSTB1 in priceRes2['price']:
+                                if priceSTB1['priceLabel'] == str(sheet['BI' + str(i)].value):
+                                    priceSTB = priceSTB1['priceId']
+                                    currencySTB = 1
+                    else:
+                        print('STB Business Model is Empty')
+
+                    # ----- STB Max View------ #
+                    maxViewSTB = '0'
+                    if not sheet['BJ' + str(i)].value is None:
+                        maxViewSTB = sheet['BJ' + str(i)].value
+                    else:
+                        print('STB Max View is Empty')
+
+                    pkgOfferSTB = {"serviceId": "" + str(serviceSTB) + "", "offerStart": "" + offerStartSTB + "", "offerEnd": "" + offerEndSTB + "", "providerContentTierId": pctSTB, "thirdPartyId": [], "comingSoonEndDate": "", "assetLifeCycleId": "", "sfvAccountId": [], "chargeCode": chgCodeSTB, "download2Go": False, "d2GoRetentionPeriodId": "", "d2GoPlaybackPeriodId": "", "d2GoMaxPlay_countId": "", "offerRow": [{"regionId": "1", "currencyId": currencySTB, "priceId": priceSTB, "inAppPrice": "", "bmId": bmSTB, "maxViewId": maxViewSTB}]}
+                    pkgoffers = [pkgOfferSTB]
+                    # pkgoffers = json.dumps(pkgOfferArray)
+                    # print(pkgoffers)
 
                 # ################### ----- IVP ------ ####################
+                if not sheet['BK' + str(i)].value is None:
+                    pkgOfferIVPRes = offerApi()
+                    for serviceAPIIVPList in pkgOfferIVPRes['service']:
+                        if serviceAPIIVPList['serviceLabel'] == sheet['BK' + str(i)].value:
+                            serviceIVP = serviceAPIIVPList['serviceId']
+
+                    # ----- IVP Offer Start------ #
+                    offerStartIVP = sheet['BL' + str(i)].value.strftime("%Y-%m-%d %H:%M:%S")
+
+                    # ----- IVP Offer End------ #
+                    offerEndIVP = sheet['BM' + str(i)].value.strftime("%Y-%m-%d %H:%M:%S")
+
+                    # ----- IVP PCT------ #
+                    if not sheet['BN' + str(i)].value is None:
+                        pctExcel = sheet['BN' + str(i)].value.replace(" ", "")
+                        pctExcelDict = pctExcel.split("|")
+                        pctIVPArray = []
+                        for pct in pctExcelDict:
+                            pctRes = offerApi()
+                            for classs in pctRes['providerContentTier']:
+                                if classs['providerContentTierLabel'] == pct and classs['serviceId'] == serviceIVP:
+                                    pctIVPArray.append("" + str(classs['providerContentTierId']) + "")
+                        pctIVP = pctIVPArray
+                    else:
+                        print('IVP PCT is Empty')
+                        break
+
+                    # ----- IVP Charge Code------ #
+                    if not sheet['BO' + str(i)].value is None:
+                        chgCodeIVP = sheet['BO' + str(i)].value
+                    else:
+                        chgCodeIVP = ''
+
+                    # ################### ----- Business Model ------ ####################
+                    bmIVP = ''
+                    currencyIVP = ''
+                    priceIVP = ''
+
+                    if not sheet['BP' + str(i)].value is None:
+                        offerRes = offerApi()
+                        offerRes2 = offerRes['offerRow']
+                        for bizmodIVP in offerRes2['offerType']:
+                            if bizmodIVP['offerTypeLabel'] == sheet['BP' + str(i)].value:
+                                bmIVP = bizmodIVP['offerTypeId']
+
+                        # ##### --- Set IVP currency and Price for Offer Type TVOD ----- #####
+                        if bmIVP == 1:
+                            priceRes = offerApi()
+                            priceRes2 = priceRes['offerRow']
+                            for priceIVP1 in priceRes2['price']:
+                                if priceIVP1['priceLabel'] == str(sheet['BQ' + str(i)].value):
+                                    priceIVP = priceIVP1['priceId']
+                                    currencyIVP = 1
+
+                        # ##### --- Set IVP InApp Price ----- #####
+                        if not sheet['BR' + str(i)].value is None:
+                            inAppPrcIVPRes = offerApi()
+                            for inAppPrcIVP1 in inAppPrcIVPRes['inAppPrice']:
+                                if inAppPrcIVP1['inAppPriceLabel'] == str(sheet['BR' + str(i)].value):
+                                    inAppPrcIVP = inAppPrcIVP1['inAppPriceId']
+                        else:
+                            inAppPrcIVP = 5
+
+                        # ----- IVP Max View------ #
+                        maxViewIVP = '0'
+                        if not sheet['BS' + str(i)].value is None:
+                            maxViewIVP = sheet['BS' + str(i)].value
+                        else:
+                            print('IVP Max View is Empty')
+
+                        # ----- IVP D2Go Retention Period------ #
+                        if not sheet['BT' + str(i)].value is None:
+                            d2gIVPRes = offerApi()
+                            for d2gIVPRes1 in d2gIVPRes['d2GoRetentionPeriod']:
+                                if d2gIVPRes1['downloadToGoRetentionLabel'] == sheet['BT' + str(i)].value and d2gIVPRes1['serviceId'] == serviceIVP:
+                                    d2goRetentionIVP = d2gIVPRes1['downloadToGoRetentionId']
+                                    d2goIVP = True
+
+                            # ----- IVP D2Go Playback Period------ #
+                            if not sheet['BU' + str(i)].value is None:
+                                d2gPlaybackIVPRes = offerApi()
+                                for d2gPlaybackIVPRes1 in d2gPlaybackIVPRes['d2GoPlaybackPeriod']:
+                                    if d2gPlaybackIVPRes1['downloadToGoPlaybackLabel'] == sheet['BU' + str(i)].value and d2gPlaybackIVPRes1['serviceId'] == serviceIVP:
+                                        d2goPlPdIVP = d2gPlaybackIVPRes1['downloadToGoPlaybackId']
+                            else:
+                                d2goPlPdIVP = ''
+
+                            # ----- IVP D2Go Max Play-count------ #
+                            if not sheet['BV' + str(i)].value is None:
+                                d2gMaxPlaybackIVPRes = offerApi()
+                                for d2gMaxPlaybackIVPRes1 in d2gMaxPlaybackIVPRes['d2GoMaxPlayCount']:
+                                    if d2gMaxPlaybackIVPRes1['downloadToGoMaxPlayCountLabel'] == sheet['BV' + str(i)].value and d2gMaxPlaybackIVPRes1['serviceId'] == serviceIVP:
+                                        d2goMaxPlIVP = d2gMaxPlaybackIVPRes1['downloadToGoMaxPlayCountId']
+                            else:
+                                d2goMaxPlIVP = ''
+
+                        else:
+                            d2goIVP = False
+                            d2goRetentionIVP = ''
+                            d2goPlPdIVP = ''
+                            d2goMaxPlIVP = ''
+
+                # {"serviceId":"21","offerStart":"2021-03-01 00:00:00","offerEnd":"2022-12-31 00:00:00","providerContentTierId":["747"],"thirdPartyId":[],"comingSoonEndDate":"","assetLifeCycleId":"","sfvAccountId":[],"chargeCode":"abcd","castingId":[],"blockAds":false,"preLogin":false,"download2Go":false,"d2GoRetentionPeriodId":"","d2GoPlaybackPeriodId":"","d2GoMaxPlay_countId":"","offerRow":[{"offerTypeId":"2","regionId":"1","currencyId":"","priceId":"","inAppPrice":"","maxViewId":"0"}]}
+                pkgOfferIVP = {"serviceId": serviceIVP, "offerStart": offerStartIVP, "offerEnd": offerEndIVP, "providerContentTierId": pctIVP, "thirdPartyId": [], "comingSoonEndDate": "", "assetLifeCycleId": "", "sfvAccountId": [], "chargeCode": chgCodeIVP, "castingId": [], "blockAds": False, "preLogin": False, "download2Go": d2goIVP, "d2GoRetentionPeriodId": d2goRetentionIVP, "d2GoPlaybackPeriodId": d2goPlPdIVP, "d2GoMaxPlay_countId": d2goMaxPlIVP, "offerRow": [{"offerTypeId": bmIVP, "regionId": "1", "currencyId": currencyIVP, "priceId": priceIVP, "inAppPrice": inAppPrcIVP, "maxViewId": maxViewIVP}]}
+                #pkgoffers = [pkgOfferIVP] pkgOfferSTB
+                pkgoffers.append(pkgOfferIVP)
+                print(pkgoffers)
 
                 # ################### ----- SOTT ------ ####################
 
                 # ########## savePackageapi API call function ###############
                 packageRes = savePackageapi(packagename, pkgid, pkgtypeid, autopublish, channelowner, pkgclassification, boxsettypeid, sortorder, acqstart, acqend, sponsored, supplierid, contentid, pkgoffers)
                 print(packageRes['packId'])
+                #print(packageRes)
 
             # #################--- (MP) Season ---##################
             elif not sheet['J' + str(i)].value is None and sheet['K' + str(i)].value is None:
