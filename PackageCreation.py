@@ -327,10 +327,10 @@ for row in sheet.iter_rows(min_row=4, max_col=1):
                     else:
                         print('STB Max View is Empty')
 
-                    pkgOfferSTB = {"serviceId": "" + str(serviceSTB) + "", "offerStart": "" + offerStartSTB + "", "offerEnd": "" + offerEndSTB + "", "providerContentTierId": pctSTB, "thirdPartyId": [], "comingSoonEndDate": "", "assetLifeCycleId": "", "sfvAccountId": [], "chargeCode": chgCodeSTB, "download2Go": False, "d2GoRetentionPeriodId": "", "d2GoPlaybackPeriodId": "", "d2GoMaxPlay_countId": "", "offerRow": [{"regionId": "1", "currencyId": currencySTB, "priceId": priceSTB, "inAppPrice": "", "bmId": bmSTB, "maxViewId": maxViewSTB}]}
-                    pkgoffers = [pkgOfferSTB]
-                    # pkgoffers = json.dumps(pkgOfferArray)
-                    # print(pkgoffers)
+                pkgOfferSTB = {"serviceId": "" + str(serviceSTB) + "", "offerStart": "" + offerStartSTB + "", "offerEnd": "" + offerEndSTB + "", "providerContentTierId": pctSTB, "thirdPartyId": [], "comingSoonEndDate": "", "assetLifeCycleId": "", "sfvAccountId": [], "chargeCode": chgCodeSTB, "download2Go": False, "d2GoRetentionPeriodId": "", "d2GoPlaybackPeriodId": "", "d2GoMaxPlay_countId": "", "offerRow": [{"regionId": "1", "currencyId": currencySTB, "priceId": priceSTB, "inAppPrice": "", "bmId": bmSTB, "maxViewId": maxViewSTB}]}
+                pkgoffers = [pkgOfferSTB]
+                # pkgoffers = json.dumps(pkgOfferArray)
+                # print(pkgoffers)
 
                 # ################### ----- IVP ------ ####################
                 if not sheet['BK' + str(i)].value is None:
@@ -401,7 +401,7 @@ for row in sheet.iter_rows(min_row=4, max_col=1):
                         if not sheet['BS' + str(i)].value is None:
                             maxViewIVP = sheet['BS' + str(i)].value
                         else:
-                            print('IVP Max View is Empty')
+                            maxViewIVP = '0'
 
                         # ----- IVP D2Go Retention Period------ #
                         if not sheet['BT' + str(i)].value is None:
@@ -435,13 +435,148 @@ for row in sheet.iter_rows(min_row=4, max_col=1):
                             d2goPlPdIVP = ''
                             d2goMaxPlIVP = ''
 
-                # {"serviceId":"21","offerStart":"2021-03-01 00:00:00","offerEnd":"2022-12-31 00:00:00","providerContentTierId":["747"],"thirdPartyId":[],"comingSoonEndDate":"","assetLifeCycleId":"","sfvAccountId":[],"chargeCode":"abcd","castingId":[],"blockAds":false,"preLogin":false,"download2Go":false,"d2GoRetentionPeriodId":"","d2GoPlaybackPeriodId":"","d2GoMaxPlay_countId":"","offerRow":[{"offerTypeId":"2","regionId":"1","currencyId":"","priceId":"","inAppPrice":"","maxViewId":"0"}]}
                 pkgOfferIVP = {"serviceId": serviceIVP, "offerStart": offerStartIVP, "offerEnd": offerEndIVP, "providerContentTierId": pctIVP, "thirdPartyId": [], "comingSoonEndDate": "", "assetLifeCycleId": "", "sfvAccountId": [], "chargeCode": chgCodeIVP, "castingId": [], "blockAds": False, "preLogin": False, "download2Go": d2goIVP, "d2GoRetentionPeriodId": d2goRetentionIVP, "d2GoPlaybackPeriodId": d2goPlPdIVP, "d2GoMaxPlay_countId": d2goMaxPlIVP, "offerRow": [{"offerTypeId": bmIVP, "regionId": "1", "currencyId": currencyIVP, "priceId": priceIVP, "inAppPrice": inAppPrcIVP, "maxViewId": maxViewIVP}]}
                 #pkgoffers = [pkgOfferIVP] pkgOfferSTB
                 pkgoffers.append(pkgOfferIVP)
-                print(pkgoffers)
+                #print(pkgoffers)
 
                 # ################### ----- SOTT ------ ####################
+
+                if not sheet['BW' + str(i)].value is None:
+                    pkgOfferSOTTRes = offerApi()
+                    for serviceAPISOTTList in pkgOfferSOTTRes['service']:
+                        if serviceAPISOTTList['serviceLabel'] == sheet['BW' + str(i)].value:
+                            serviceSOTT = serviceAPISOTTList['serviceId']
+
+                    # ----- SOTT Offer Start------ #
+                    offerStartSOTT = sheet['BX' + str(i)].value.strftime("%Y-%m-%d %H:%M:%S")
+
+                    # ----- SOTT Offer End------ #
+                    offerEndSOTT = sheet['BY' + str(i)].value.strftime("%Y-%m-%d %H:%M:%S")
+
+                    # ----- SOTT PCT------ #
+                    if not sheet['BZ' + str(i)].value is None:
+                        #pctExcel = sheet['BZ' + str(i)].value.replace(" ", "")
+                        pctExcel = sheet['BZ' + str(i)].value
+                        pctExcelDict = pctExcel.split("|")
+                        pctSOTTArray = []
+                        for pct in pctExcelDict:
+                            pctRes = offerApi()
+                            for classs in pctRes['providerContentTier']:
+                                if classs['providerContentTierLabel'] == pct and classs['serviceId'] == serviceSOTT:
+                                    pctSOTTArray.append("" + str(classs['providerContentTierId']) + "")
+                                    pctSOTT = pctSOTTArray
+                    else:
+                        pctSOTT = pctSOTTArray
+
+                    # ----- SOTT ChargeCode------ #
+                    if not sheet['CA' + str(i)].value is None:
+                        chgCodeSOTT = sheet['CA' + str(i)].value
+                    else:
+                        chgCodeSOTT = ''
+
+                    # ################### ----- Business Model SOTT------ ####################
+                    bmSOTT = ''
+                    currencySOTT = ''
+                    priceSOTT = ''
+                    inAppPrcSOTT = ''
+
+                    if not sheet['CB' + str(i)].value is None:
+                        offerRes = offerApi()
+                        offerRes2 = offerRes['offerRow']
+                        for bizmodSOTT in offerRes2['offerType']:
+                            if bizmodSOTT['offerTypeLabel'] == sheet['CB' + str(i)].value:
+                                bmSOTT = bizmodSOTT['offerTypeId']
+
+                        # ##### --- Set IVP currency and Price for Offer Type TVOD ----- #####
+                        if bmSOTT == 1:
+                            priceRes = offerApi()
+                            priceRes2 = priceRes['offerRow']
+                            for priceSOTT1 in priceRes2['price']:
+                                if priceSOTT1['priceLabel'] == str(sheet['CC' + str(i)].value):
+                                    priceSOTT = priceSOTT1['priceId']
+                                    currencySOTT = 1
+
+                        # ##### --- Set IVP InApp Price ----- #####
+                        if not sheet['CD' + str(i)].value is None:
+                            inAppPrcSOTTRes = offerApi()
+                            for inAppPrcSOTT1 in inAppPrcSOTTRes['inAppPrice']:
+                                if inAppPrcSOTT1['inAppPriceLabel'] == str(sheet['CD' + str(i)].value):
+                                    inAppPrcSOTT = inAppPrcSOTT1['inAppPriceId']
+                        else:
+                            inAppPrcSOTT = 5
+
+                    # ----- IVP Max View------ #
+                    maxViewSOTT = '0'
+                    if not sheet['CE' + str(i)].value is None:
+                        maxViewSOTT = sheet['CE' + str(i)].value
+                    else:
+                        maxViewSOTT = '0'
+
+                    # ----- SOTT D2Go Retention Period------ #
+                    if not sheet['CF' + str(i)].value is None:
+                        d2gSOTTRes = offerApi()
+                        for d2gSOTTRes1 in d2gSOTTRes['d2GoRetentionPeriod']:
+                            if d2gSOTTRes1['downloadToGoRetentionLabel'] == sheet['CF' + str(i)].value and d2gSOTTRes1['serviceId'] == serviceSOTT:
+                                d2goRetentionSOTT = d2gSOTTRes1['downloadToGoRetentionId']
+                                d2goSOTT = True
+
+                        # ----- IVP D2Go Playback Period------ #
+                        if not sheet['CG' + str(i)].value is None:
+                            d2gPlaybackSOTTRes = offerApi()
+                            for d2gPlaybackSOTTRes1 in d2gPlaybackSOTTRes['d2GoPlaybackPeriod']:
+                                if d2gPlaybackSOTTRes1['downloadToGoPlaybackLabel'] == sheet['CG' + str(i)].value and d2gPlaybackSOTTRes1['serviceId'] == serviceSOTT:
+                                    d2goPlPdSOTT = d2gPlaybackSOTTRes1['downloadToGoPlaybackId']
+                        else:
+                            d2goPlPdSOTT = ''
+
+                        # ----- IVP D2Go Max Play-count------ #
+                        if not sheet['CH' + str(i)].value is None:
+                            d2gMaxPlaybackSOTTRes = offerApi()
+                            for d2gMaxPlaybackSOTTRes1 in d2gMaxPlaybackSOTTRes['d2GoMaxPlayCount']:
+                                if d2gMaxPlaybackSOTTRes1['downloadToGoMaxPlayCountLabel'] == sheet['CH' + str(i)].value and d2gMaxPlaybackSOTTRes1['serviceId'] == serviceIVP:
+                                    d2goMaxPlSOTT = d2gMaxPlaybackSOTTRes1['downloadToGoMaxPlayCountId']
+                        else:
+                            d2goMaxPlSOTT = ''
+
+                    else:
+                        d2goSOTT = False
+                        d2goRetentionSOTT = ''
+                        d2goPlPdSOTT = ''
+                        d2goMaxPlSOTT = ''
+
+                    # ----- SOTT Third Party------ #
+                    if not sheet['CI' + str(i)].value is None:
+                        thdPartySOTTExcel = sheet['CI' + str(i)].value.replace(" ", "")
+                        thdPartySOTTExcelDict = thdPartySOTTExcel.split("|")
+                        thdPartySOTTArray = []
+                        for pct in thdPartySOTTExcelDict:
+                            thdPartySOTTRes = offerApi()
+                            for classs in thdPartySOTTRes['thirdParty']:
+                                if classs['thirdPartyLabel'] == pct:
+                                    thdPartySOTTArray.append("" + str(classs['thirdPartyId']) + "")
+                                    thdPartySOTT = thdPartySOTTArray
+                    else:
+                        thdPartySOTT = []
+
+                    # ----- SOTT comingSoonEndDate------ #
+                    if not sheet['CJ' + str(i)].value is None:
+                        csEndDateSOTT = sheet['CJ' + str(i)].value.strftime("%Y-%m-%d %H:%M:%S")
+                    else:
+                        csEndDateSOTT = ''
+
+                    # ----- SOTT assetLifeCycle------ #
+                    if not sheet['CK' + str(i)].value is None:
+                        assetLCRes = offerApi()
+                        for assetLCList in assetLCRes['assetLifeCycle']:
+                            if assetLCList['assetLifeCycleLabel'] == sheet['CK' + str(i)].value:
+                                assetLCSOTT = str(assetLCList['assetLifeCycleId'])
+                    else:
+                        assetLCSOTT = ''
+
+                pkgOfferSOTT = {"serviceId": serviceSOTT, "offerStart": offerStartSOTT, "offerEnd": offerEndSOTT, "providerContentTierId": pctSOTT, "thirdPartyId": thdPartySOTT, "comingSoonEndDate": csEndDateSOTT, "assetLifeCycleId": assetLCSOTT, "sfvAccountId": [], "chargeCode": chgCodeSOTT, "castingId": [], "blockAds": False, "preLogin": False, "download2Go": d2goSOTT, "d2GoRetentionPeriodId": d2goRetentionSOTT, "d2GoPlaybackPeriodId": d2goPlPdSOTT, "d2GoMaxPlay_countId": d2goMaxPlSOTT, "offerRow": [{"offerTypeId": bmSOTT, "regionId": "1", "currencyId": currencySOTT, "priceId": priceSOTT, "inAppPrice": inAppPrcSOTT, "maxViewId": maxViewSOTT}]}
+                pkgoffers.append(pkgOfferSOTT)
+                print(pkgOfferSOTT)
 
                 # ########## savePackageapi API call function ###############
                 packageRes = savePackageapi(packagename, pkgid, pkgtypeid, autopublish, channelowner, pkgclassification, boxsettypeid, sortorder, acqstart, acqend, sponsored, supplierid, contentid, pkgoffers)
