@@ -6,6 +6,8 @@ from savePackageData import *
 from getPackageTypeApi import *
 from getMediaApi import *
 from offerApi import *
+from getContent import *
+from getVodFilters import *
 
 wb = load_workbook(r'C:\Users\MTMUNIAN\Desktop\Python\Excel\AMS.xlsx')
 
@@ -327,6 +329,7 @@ for row in sheet.iter_rows(min_row=4, max_col=1):
                     else:
                         print('STB Max View is Empty')
 
+                # ######## ------ Package STB Offer Payload ----- #############
                 pkgOfferSTB = {"serviceId": "" + str(serviceSTB) + "", "offerStart": "" + offerStartSTB + "", "offerEnd": "" + offerEndSTB + "", "providerContentTierId": pctSTB, "thirdPartyId": [], "comingSoonEndDate": "", "assetLifeCycleId": "", "sfvAccountId": [], "chargeCode": chgCodeSTB, "download2Go": False, "d2GoRetentionPeriodId": "", "d2GoPlaybackPeriodId": "", "d2GoMaxPlay_countId": "", "offerRow": [{"regionId": "1", "currencyId": currencySTB, "priceId": priceSTB, "inAppPrice": "", "bmId": bmSTB, "maxViewId": maxViewSTB}]}
                 pkgoffers = [pkgOfferSTB]
                 # pkgoffers = json.dumps(pkgOfferArray)
@@ -435,6 +438,7 @@ for row in sheet.iter_rows(min_row=4, max_col=1):
                             d2goPlPdIVP = ''
                             d2goMaxPlIVP = ''
 
+                # ######## ------ Package IVP Offer Payload ----- #############
                 pkgOfferIVP = {"serviceId": serviceIVP, "offerStart": offerStartIVP, "offerEnd": offerEndIVP, "providerContentTierId": pctIVP, "thirdPartyId": [], "comingSoonEndDate": "", "assetLifeCycleId": "", "sfvAccountId": [], "chargeCode": chgCodeIVP, "castingId": [], "blockAds": False, "preLogin": False, "download2Go": d2goIVP, "d2GoRetentionPeriodId": d2goRetentionIVP, "d2GoPlaybackPeriodId": d2goPlPdIVP, "d2GoMaxPlay_countId": d2goMaxPlIVP, "offerRow": [{"offerTypeId": bmIVP, "regionId": "1", "currencyId": currencyIVP, "priceId": priceIVP, "inAppPrice": inAppPrcIVP, "maxViewId": maxViewIVP}]}
                 #pkgoffers = [pkgOfferIVP] pkgOfferSTB
                 pkgoffers.append(pkgOfferIVP)
@@ -574,13 +578,73 @@ for row in sheet.iter_rows(min_row=4, max_col=1):
                     else:
                         assetLCSOTT = ''
 
+                # ######## ------ Package SOTT Offer Payload ----- #############
                 pkgOfferSOTT = {"serviceId": serviceSOTT, "offerStart": offerStartSOTT, "offerEnd": offerEndSOTT, "providerContentTierId": pctSOTT, "thirdPartyId": thdPartySOTT, "comingSoonEndDate": csEndDateSOTT, "assetLifeCycleId": assetLCSOTT, "sfvAccountId": [], "chargeCode": chgCodeSOTT, "castingId": [], "blockAds": False, "preLogin": False, "download2Go": d2goSOTT, "d2GoRetentionPeriodId": d2goRetentionSOTT, "d2GoPlaybackPeriodId": d2goPlPdSOTT, "d2GoMaxPlay_countId": d2goMaxPlSOTT, "offerRow": [{"offerTypeId": bmSOTT, "regionId": "1", "currencyId": currencySOTT, "priceId": priceSOTT, "inAppPrice": inAppPrcSOTT, "maxViewId": maxViewSOTT}]}
                 pkgoffers.append(pkgOfferSOTT)
-                print(pkgOfferSOTT)
+                # print(pkgOfferSOTT)
+
+                # ############ ----- Package Metadata ----- ##########
+
+                # ############ ----- Set Package Metadata Title ----- ##########
+                pkgMtdRes = getContent(contentid)
+                for pkgMtdRes1 in pkgMtdRes['contentCoreData']:
+                    pkgMtdSysTit = pkgMtdRes1['systemTitle']
+
+                # ############ ----- Set Package Metadata Certification ----- ##########
+                pkgMtdCertRes = vodFilters()
+                for pkgMtdCertRes1 in pkgMtdCertRes['certification']:
+                    if pkgMtdCertRes1['certificationValue'] == sheet['CL' + str(i)].value:
+                        pkgMtdCert = pkgMtdCertRes1['certificationId']
+
+                # ############ ----- Set Package Metadata Language ----- ##########
+                pkgMtdLangCntRes = getContent(contentid)
+                for pkgMtdLangCntRes1 in pkgMtdLangCntRes['contentCoreData']:
+                    pkgMtdLang = pkgMtdLangCntRes1['originalLanguage']
+
+                pkgMtdLangRes = vodFilters()
+                for pkgMtdLangRes1 in pkgMtdLangRes['audioLanguage']:
+                    if pkgMtdLangRes1['languageLabel'] == pkgMtdLang:
+                        pkgMtdLang = pkgMtdLangRes1['languageId']
+
+                # ############ ----- Set Package Metadata Year Of Release ----- ##########
+                pkgMtdYORRes = getContent(contentid)
+                for pkgMtdYORRes1 in pkgMtdYORRes['contentCoreData']:
+                    pkgMtdYOR = pkgMtdYORRes1['yearOfRelease']
+
+                # ############ ----- Set Package Metadata Filter----- ##########
+                pkgMtdFilStrRes = getContent(contentid)
+                for pkgMtdFilStrRes1 in pkgMtdFilStrRes['contentCoreData']:
+                    for pkgMtdFilStrRes2 in pkgMtdFilStrRes1['contentGenre']:
+                        if pkgMtdFilStrRes2['genreType'] == 'Category/Filter':
+                            pkgMtdStrFil = pkgMtdFilStrRes2['genre']
+
+                pkgMtdFilRes = vodFilters()
+                for pkgMtdFilRes1 in pkgMtdFilRes['filter']:
+                    if pkgMtdFilRes1['filterName'] == pkgMtdStrFil:
+                        pkgMtdFil = pkgMtdFilRes1['filterId']
+
+                # ############ ----- Set Package Metadata SubFilter----- ##########
+                pkgMtdFil2StrArray = []
+                pkgMtdFil2StrRes = getContent(contentid)
+                for pkgMtdFil2StrRes1 in pkgMtdFil2StrRes['contentCoreData']:
+                    for pkgMtdFil2StrRes2 in pkgMtdFil2StrRes1['contentGenre']:
+                        if pkgMtdFil2StrRes2['genreType'] == 'Category/Filter':
+                            pkgMtdStrFil2 = pkgMtdFil2StrRes2['subgenre']
+                            # ######### --- To get Subfilter Int value ----- ########
+                            pkgMtdFil2Res = vodFilters()
+                            for pkgMtdFilRes1 in pkgMtdFil2Res['filter']:
+                                for pkgMtdFilRes2 in pkgMtdFilRes1['subFilters']:
+                                    if pkgMtdFilRes2['subFilterName'] == pkgMtdStrFil2:
+                                        pkgMtdFil2StrArray.append("" + str(pkgMtdFilRes2['subFilterId']) + "")
+                                        pkgMtdFil2 = pkgMtdFil2StrArray
+
+                # {"englishMetadata":{"title":"Tokyo 2020 Olympic: Daily Highlights Day -2 Part 1","certification":"3","audioLanguage":"5","yearOfRealease":"2021","filter":"8","subFilter":["57","58"],"genre":"4","subGenre":"11","shortSynopsis":"Catch up on Olympics Tokyo 2020 daily Highlights, actions and best moments - Day -02 Part 1","longSynopsis":"Catch up on Olympics Tokyo 2020 daily Highlights, actions and best moments - Day -02 Part 1","contentId":"12931"},"vernacular":[{"languageId":"1"},{"languageId":"2"},{"languageId":"3"},{"languageId":"4"},{"languageId":"5"}]}
+                metadata = {"englishMetadata": {"title": pkgMtdSysTit, "certification": pkgMtdCert, "audioLanguage": pkgMtdLang, "yearOfRealease": pkgMtdYOR, "filter": pkgMtdFil, "subFilter": pkgMtdFil2, "genre": "24", "subGenre": "209", "shortSynopsis": "Catch up on Olympics Tokyo 2020 daily Highlights, actions and best moments - Day -02 Part 1", "longSynopsis":"Catch up on Olympics Tokyo 2020 daily Highlights, actions and best moments - Day -02 Part 1", "contentId": "12931"}, "vernacular": [{"languageId": "1"}, {"languageId": "2"}, {"languageId": "3"}, {"languageId": "4"}, {"languageId": "5"}]}
+                print(metadata)
 
                 # ########## savePackageapi API call function ###############
-                packageRes = savePackageapi(packagename, pkgid, pkgtypeid, autopublish, channelowner, pkgclassification, boxsettypeid, sortorder, acqstart, acqend, sponsored, supplierid, contentid, pkgoffers)
-                print(packageRes['packId'])
+                #packageRes = savePackageapi(packagename, pkgid, pkgtypeid, autopublish, channelowner, pkgclassification, boxsettypeid, sortorder, acqstart, acqend, sponsored, supplierid, contentid, pkgoffers, metadata)
+                #print(packageRes['packId'])
                 #print(packageRes)
 
             # #################--- (MP) Season ---##################
