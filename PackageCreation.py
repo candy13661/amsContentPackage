@@ -594,22 +594,22 @@ for row in sheet.iter_rows(min_row=4, max_col=1):
                 pkgMtdCertRes = vodFilters()
                 for pkgMtdCertRes1 in pkgMtdCertRes['certification']:
                     if pkgMtdCertRes1['certificationValue'] == sheet['CL' + str(i)].value:
-                        pkgMtdCert = pkgMtdCertRes1['certificationId']
+                        pkgMtdCert = str(pkgMtdCertRes1['certificationId'])
 
                 # ############ ----- Set Package Metadata Language ----- ##########
                 pkgMtdLangCntRes = getContent(contentid)
                 for pkgMtdLangCntRes1 in pkgMtdLangCntRes['contentCoreData']:
-                    pkgMtdLang = pkgMtdLangCntRes1['originalLanguage']
+                    pkgMtdLang = str(pkgMtdLangCntRes1['originalLanguage'])
 
                 pkgMtdLangRes = vodFilters()
                 for pkgMtdLangRes1 in pkgMtdLangRes['audioLanguage']:
                     if pkgMtdLangRes1['languageLabel'] == pkgMtdLang:
-                        pkgMtdLang = pkgMtdLangRes1['languageId']
+                        pkgMtdLang = str(pkgMtdLangRes1['languageId'])
 
                 # ############ ----- Set Package Metadata Year Of Release ----- ##########
                 pkgMtdYORRes = getContent(contentid)
                 for pkgMtdYORRes1 in pkgMtdYORRes['contentCoreData']:
-                    pkgMtdYOR = pkgMtdYORRes1['yearOfRelease']
+                    pkgMtdYOR = str(pkgMtdYORRes1['yearOfRelease'])
 
                 # ############ ----- Set Package Metadata Filter----- ##########
                 pkgMtdFilStrRes = getContent(contentid)
@@ -621,7 +621,7 @@ for row in sheet.iter_rows(min_row=4, max_col=1):
                 pkgMtdFilRes = vodFilters()
                 for pkgMtdFilRes1 in pkgMtdFilRes['filter']:
                     if pkgMtdFilRes1['filterName'] == pkgMtdStrFil:
-                        pkgMtdFil = pkgMtdFilRes1['filterId']
+                        pkgMtdFil = str(pkgMtdFilRes1['filterId'])
 
                 # ############ ----- Set Package Metadata SubFilter----- ##########
                 pkgMtdFil2StrArray = []
@@ -638,13 +638,32 @@ for row in sheet.iter_rows(min_row=4, max_col=1):
                                         pkgMtdFil2StrArray.append("" + str(pkgMtdFilRes2['subFilterId']) + "")
                                         pkgMtdFil2 = pkgMtdFil2StrArray
 
+                # ############ ----- Set Package Metadata Genre/SubGenre----- ##########
+                pkgMtdGenStrRes = getContent(contentid)
+                for pkgMtdGenStrRes1 in pkgMtdGenStrRes['contentCoreData']:
+                    for pkgMtdGenStrRes2 in pkgMtdGenStrRes1['contentGenre']:
+                        if pkgMtdGenStrRes2['genreType'] == 'DVB':
+                            pkgMtdGen = str(pkgMtdGenStrRes2['genreId'])
+                            pkgMtdSubGen = str(pkgMtdGenStrRes2['subGenreId'])
+
+                # ############ ----- Set Package Metadata Short Synopsis----- ##########
+                pkgMtdShtSynStrRes = getContent(contentid)
+                for pkgMtdShtSynStrRes1 in pkgMtdShtSynStrRes['contentCoreData']:
+                    for pkgMtdShtSynStrRes2 in pkgMtdShtSynStrRes1['contentSynopsis']:
+                        if pkgMtdShtSynStrRes2['synopsisType'] == 'Short':
+                            pkgMtdShtSyn = pkgMtdShtSynStrRes2['synopsis']
+
+                        if pkgMtdShtSynStrRes2['synopsisType'] == 'Long':
+                            pkgMtdLngSyn = pkgMtdShtSynStrRes2['synopsis']
+
+
                 # {"englishMetadata":{"title":"Tokyo 2020 Olympic: Daily Highlights Day -2 Part 1","certification":"3","audioLanguage":"5","yearOfRealease":"2021","filter":"8","subFilter":["57","58"],"genre":"4","subGenre":"11","shortSynopsis":"Catch up on Olympics Tokyo 2020 daily Highlights, actions and best moments - Day -02 Part 1","longSynopsis":"Catch up on Olympics Tokyo 2020 daily Highlights, actions and best moments - Day -02 Part 1","contentId":"12931"},"vernacular":[{"languageId":"1"},{"languageId":"2"},{"languageId":"3"},{"languageId":"4"},{"languageId":"5"}]}
-                metadata = {"englishMetadata": {"title": pkgMtdSysTit, "certification": pkgMtdCert, "audioLanguage": pkgMtdLang, "yearOfRealease": pkgMtdYOR, "filter": pkgMtdFil, "subFilter": pkgMtdFil2, "genre": "24", "subGenre": "209", "shortSynopsis": "Catch up on Olympics Tokyo 2020 daily Highlights, actions and best moments - Day -02 Part 1", "longSynopsis":"Catch up on Olympics Tokyo 2020 daily Highlights, actions and best moments - Day -02 Part 1", "contentId": "12931"}, "vernacular": [{"languageId": "1"}, {"languageId": "2"}, {"languageId": "3"}, {"languageId": "4"}, {"languageId": "5"}]}
+                metadata = {"englishMetadata": {"title": pkgMtdSysTit, "certification": pkgMtdCert, "audioLanguage": pkgMtdLang, "yearOfRealease": pkgMtdYOR, "filter": pkgMtdFil, "subFilter": pkgMtdFil2, "genre": pkgMtdGen, "subGenre": pkgMtdSubGen, "shortSynopsis": pkgMtdShtSyn, "longSynopsis": pkgMtdShtSyn, "contentId": contentid}, "vernacular": [{"languageId": "1"}, {"languageId": "2"}, {"languageId": "3"}, {"languageId": "4"}, {"languageId": "5"}]}
                 print(metadata)
 
                 # ########## savePackageapi API call function ###############
-                #packageRes = savePackageapi(packagename, pkgid, pkgtypeid, autopublish, channelowner, pkgclassification, boxsettypeid, sortorder, acqstart, acqend, sponsored, supplierid, contentid, pkgoffers, metadata)
-                #print(packageRes['packId'])
+                packageRes = savePackageapi(packagename, pkgid, pkgtypeid, autopublish, channelowner, pkgclassification, boxsettypeid, sortorder, acqstart, acqend, sponsored, supplierid, contentid, pkgoffers, metadata)
+                print(packageRes['packId'])
                 #print(packageRes)
 
             # #################--- (MP) Season ---##################
